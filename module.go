@@ -286,9 +286,9 @@ func (m *Module) Open() {
 	}
 
 	weights := make(map[string]int, 0)
-	role := bamgoo.Role()
-	if role == "" {
-		role = bamgoo.BAMGOO
+	profile := bamgoo.Identity().Profile
+	if profile == "" {
+		profile = bamgoo.BAMGOO
 	}
 	for name, cfg := range m.configs {
 		driver, ok := m.drivers[cfg.Driver]
@@ -315,7 +315,7 @@ func (m *Module) Open() {
 				if err := conn.Register(cfg.Prefix+broadcastSubjectPrefix+evName, ""); err != nil {
 					panic("failed to register event broadcast: " + err.Error())
 				}
-				if err := conn.Register(cfg.Prefix+publishSubjectPrefix+evName, role); err != nil {
+				if err := conn.Register(cfg.Prefix+publishSubjectPrefix+evName, profile); err != nil {
 					panic("failed to register event: " + err.Error())
 				}
 			}
