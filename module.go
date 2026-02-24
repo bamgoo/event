@@ -93,12 +93,24 @@ func (m *Module) Register(name string, value Any) {
 		m.RegisterConfigs(v)
 	case Event:
 		m.RegisterEvent(name, v)
+	case Events:
+		m.RegisterEvents(name, v)
 	case Declare:
 		m.RegisterDeclare(name, v)
 	case Filter:
 		m.RegisterFilter(name, v)
 	case Handler:
 		m.RegisterHandler(name, v)
+	}
+}
+
+func (m *Module) RegisterEvents(prefix string, events Events) {
+	for name, event := range events {
+		target := name
+		if prefix != "" {
+			target = prefix + "." + name
+		}
+		m.RegisterEvent(target, event)
 	}
 }
 

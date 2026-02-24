@@ -25,6 +25,8 @@ type (
 		Connect string `json:"connect"`
 	}
 
+	Events map[string]Event
+
 	Declare struct {
 		Alias    []string `json:"alias"`
 		Name     string   `json:"name"`
