@@ -359,7 +359,7 @@ func (m *Module) Start() {
 		}
 	}
 
-	fmt.Printf("event module is running with %d connections, %d events.\n", len(m.instances), len(m.events))
+	fmt.Printf("bamgoo event module is running with %d connections, %d events.\n", len(m.instances), len(m.events))
 	m.started = true
 }
 
