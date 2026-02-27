@@ -513,7 +513,6 @@ func (inst *Instance) serving(name string, data []byte) {
 	}
 
 	inst.open(ctx)
-	bamgoo.CloseMeta(ctx.Meta)
 }
 
 func (inst *Instance) open(ctx *Context) {
