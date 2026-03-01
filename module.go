@@ -512,7 +512,7 @@ func (inst *Instance) serving(name string, data []byte) {
 		}
 	}
 
-	span := ctx.Begin("event:"+ctx.Name, bamgoo.TraceAttrs("bamgoo", bamgoo.TraceKindConsumer, ctx.Name, Map{
+	span := ctx.Begin("event:"+ctx.Name, bamgoo.TraceAttrs("bamgoo", bamgoo.TraceKindEvent, ctx.Name, Map{
 		"module":     "event",
 		"connection": inst.Name,
 		"operation":  "consume",
@@ -520,7 +520,7 @@ func (inst *Instance) serving(name string, data []byte) {
 
 	inst.open(ctx)
 	if res := ctx.Result(); res != nil && res.Fail() {
-		span.End(errors.New(res.Error()))
+		span.End(res)
 	} else {
 		span.End()
 	}
