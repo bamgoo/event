@@ -1,78 +1,58 @@
 # event
 
-`event` 是 infrago 的模块包。
+`event` 是 infrago 的**模块**。
 
-## 安装
+## 包定位
 
-```bash
-go get github.com/infrago/event@latest
-```
+- 类型：模块
+- 作用：事件模块，负责事件发布、订阅与分发。
 
-## 最小接入
+## 主要功能
+
+- 对上提供统一模块接口
+- 对下通过驱动接口接入具体后端
+- 支持按配置切换驱动实现
+
+## 快速接入
 
 ```go
-package main
-
-import (
-    _ "github.com/infrago/event"
-    "github.com/infrago/infra"
-)
-
-func main() {
-    infra.Run()
-}
+import _ "github.com/infrago/event"
 ```
-
-## 配置示例
 
 ```toml
 [event]
 driver = "default"
 ```
 
-## 公开 API（摘自源码）
+## 驱动实现接口列表
 
-- `func (Event) RegistryComponent() string`
-- `func (Events) RegistryComponent() string`
-- `func (ctx *Context) Next()`
-- `func (ctx *Context) Found()`
-- `func (ctx *Context) Error(res Res)`
-- `func (ctx *Context) Failed(res Res)`
-- `func (ctx *Context) Denied(res Res)`
-- `func (d *defaultDriver) Connect(inst *Instance) (Connection, error)`
-- `func (c *defaultConnection) Open() error  { return nil }`
-- `func (c *defaultConnection) Close() error { return nil }`
-- `func (c *defaultConnection) Register(name, _ string) error`
-- `func (c *defaultConnection) Start() error`
-- `func (c *defaultConnection) Stop() error`
-- `func (c *defaultConnection) Publish(name string, data []byte) error`
-- `func Publish(name string, values ...Map) error`
-- `func PublishTo(conn, name string, values ...Map) error`
-- `func Broadcast(name string, values ...Map) error`
-- `func BroadcastTo(conn, name string, values ...Map) error`
-- `func RegisterDriver(name string, driver Driver)`
-- `func RegisterConfig(name string, cfg Config)`
-- `func RegisterConfigs(cfgs Configs)`
-- `func (m *Module) RegisterEvent(name string, cfg Event)`
-- `func (m *Module) RegisterDeclare(name string, cfg Declare)`
-- `func (m *Module) RegisterFilter(name string, cfg Filter)`
-- `func (m *Module) RegisterHandler(name string, cfg Handler)`
-- `func (m *Module) Register(name string, value Any)`
-- `func (m *Module) RegisterEvents(prefix string, events Events)`
-- `func (m *Module) RegisterDriver(name string, driver Driver)`
-- `func (m *Module) RegisterConfig(name string, cfg Config)`
-- `func (m *Module) RegisterConfigs(configs Configs)`
-- `func (m *Module) Config(global Map)`
-- `func (m *Module) Setup()`
-- `func (m *Module) Open()`
-- `func (m *Module) Start()`
-- `func (m *Module) Stop()`
-- `func (m *Module) Close()`
-- `func (inst *Instance) Submit(next func())`
-- `func (inst *Instance) Serve(name string, data []byte)`
+以下接口由驱动实现（来自模块 `driver.go`）：
 
-## 排错
+### Driver
 
-- 模块未运行：确认空导入已存在
-- driver 无效：确认驱动包已引入
-- 配置不生效：检查配置段名是否为 `[event]`
+- `Connect(*Instance) (Connection, error)`
+
+### Connection
+
+- `Open() error`
+- `Close() error`
+- `Start() error`
+- `Stop() error`
+- `Register(name, group string) error`
+- `Publish(name string, data []byte) error`
+
+## 全局配置项（所有配置键）
+
+配置段：`[event]`
+
+- `driver`
+- `external`
+- `codec`
+- `prefix`
+- `weight`
+- `setting`
+
+## 说明
+
+- `setting` 一般用于向具体驱动透传专用参数
+- 多实例配置请参考模块源码中的 Config/configure 处理逻辑
