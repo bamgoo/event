@@ -1,14 +1,14 @@
 package event
 
 import (
-	"github.com/bamgoo/bamgoo"
-	. "github.com/bamgoo/base"
+	"github.com/infrago/infra"
+	. "github.com/infrago/base"
 )
 
 type (
 	Context struct {
 		inst *Instance
-		*bamgoo.Meta
+		*infra.Meta
 
 		index int
 		nexts []ctxFunc

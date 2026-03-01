@@ -1,2 +1,2 @@
 # event
-bamgoo event module.
+infrago event module.

@@ -1,8 +1,8 @@
 package event
 
 import (
-	"github.com/bamgoo/bamgoo"
-	. "github.com/bamgoo/base"
+	"github.com/infrago/infra"
+	. "github.com/infrago/base"
 )
 
 type (
@@ -59,7 +59,7 @@ func (m *Module) RegisterEvent(name string, cfg Event) {
 
 	m.mutex.Lock()
 	for _, key := range keys {
-		if bamgoo.Override() {
+		if infra.Override() {
 			m.events[key] = cfg
 		} else if _, ok := m.events[key]; !ok {
 			m.events[key] = cfg
@@ -82,7 +82,7 @@ func (m *Module) RegisterDeclare(name string, cfg Declare) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	for _, key := range keys {
-		if bamgoo.Override() {
+		if infra.Override() {
 			m.declares[key] = cfg
 		} else if _, ok := m.declares[key]; !ok {
 			m.declares[key] = cfg
@@ -96,7 +96,7 @@ func (m *Module) RegisterFilter(name string, cfg Filter) {
 	}
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	if bamgoo.Override() {
+	if infra.Override() {
 		m.filters[name] = cfg
 	} else if _, ok := m.filters[name]; !ok {
 		m.filters[name] = cfg
@@ -109,7 +109,7 @@ func (m *Module) RegisterHandler(name string, cfg Handler) {
 	}
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	if bamgoo.Override() {
+	if infra.Override() {
 		m.handlers[name] = cfg
 	} else if _, ok := m.handlers[name]; !ok {
 		m.handlers[name] = cfg

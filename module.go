@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/bamgoo/bamgoo"
-	. "github.com/bamgoo/base"
-	"github.com/bamgoo/util"
+	"github.com/infrago/infra"
+	. "github.com/infrago/base"
+	"github.com/infrago/util"
 )
 
 var (
@@ -22,7 +22,7 @@ const (
 )
 
 func init() {
-	bamgoo.Mount(module)
+	infra.Mount(module)
 }
 
 var module = &Module{
@@ -78,7 +78,7 @@ type (
 
 	msgEnvelope struct {
 		Name     string          `json:"name"`
-		Metadata bamgoo.Metadata `json:"metadata"`
+		Metadata infra.Metadata `json:"metadata"`
 		Payload  Map             `json:"payload"`
 	}
 )
@@ -119,7 +119,7 @@ func (m *Module) RegisterDriver(name string, driver Driver) {
 	defer m.mutex.Unlock()
 
 	if name == "" {
-		name = bamgoo.DEFAULT
+		name = infra.DEFAULT
 	}
 	if driver == nil {
 		panic("invalid event driver: " + name)
@@ -138,7 +138,7 @@ func (m *Module) RegisterConfig(name string, cfg Config) {
 		return
 	}
 	if name == "" {
-		name = bamgoo.DEFAULT
+		name = infra.DEFAULT
 	}
 	if _, ok := m.configs[name]; ok {
 		panic("event config already registered: " + name)
@@ -178,14 +178,14 @@ func (m *Module) Config(global Map) {
 		}
 	}
 	if len(root) > 0 {
-		m.configure(bamgoo.DEFAULT, root)
+		m.configure(infra.DEFAULT, root)
 	}
 }
 
 func (m *Module) configure(name string, conf Map) {
 	cfg := Config{
-		Driver: bamgoo.DEFAULT,
-		Codec:  bamgoo.GOB,
+		Driver: infra.DEFAULT,
+		Codec:  infra.GOB,
 		Weight: 1,
 	}
 	if existed, ok := m.configs[name]; ok {
@@ -230,19 +230,19 @@ func (m *Module) Setup() {
 	defer m.mutex.Unlock()
 
 	if len(m.configs) == 0 {
-		m.configs[bamgoo.DEFAULT] = Config{
-			Driver: bamgoo.DEFAULT,
-			Codec:  bamgoo.GOB,
+		m.configs[infra.DEFAULT] = Config{
+			Driver: infra.DEFAULT,
+			Codec:  infra.GOB,
 			Weight: 1,
 		}
 	}
 
 	for name, cfg := range m.configs {
 		if cfg.Driver == "" {
-			cfg.Driver = bamgoo.DEFAULT
+			cfg.Driver = infra.DEFAULT
 		}
 		if cfg.Codec == "" {
-			cfg.Codec = bamgoo.GOB
+			cfg.Codec = infra.GOB
 		}
 		if cfg.Weight == 0 {
 			cfg.Weight = 1
@@ -298,9 +298,9 @@ func (m *Module) Open() {
 	}
 
 	weights := make(map[string]int, 0)
-	profile := bamgoo.Identity().Profile
+	profile := infra.Identity().Profile
 	if profile == "" {
-		profile = bamgoo.BAMGOO
+		profile = infra.INFRAGO
 	}
 	for name, cfg := range m.configs {
 		driver, ok := m.drivers[cfg.Driver]
@@ -359,7 +359,7 @@ func (m *Module) Start() {
 		}
 	}
 
-	fmt.Printf("bamgoo event module is running with %d connections, %d events.\n", len(m.instances), len(m.events))
+	fmt.Printf("infrago event module is running with %d connections, %d events.\n", len(m.instances), len(m.events))
 	m.started = true
 }
 
@@ -432,7 +432,7 @@ func (m *Module) publishMode(connName, mode, name string, values ...Map) error {
 
 	if dec, ok := m.declares[name]; ok && dec.Args != nil {
 		mapped := Map{}
-		res := bamgoo.Mapping(dec.Args, payload, mapped, dec.Nullable, false)
+		res := infra.Mapping(dec.Args, payload, mapped, dec.Nullable, false)
 		if res == nil || res.OK() {
 			payload = mapped
 		}
@@ -440,7 +440,7 @@ func (m *Module) publishMode(connName, mode, name string, values ...Map) error {
 
 	var data []byte
 	if inst.Config.External {
-		bytes, err := bamgoo.Marshal(inst.Config.Codec, payload)
+		bytes, err := infra.Marshal(inst.Config.Codec, payload)
 		if err != nil {
 			return err
 		}
@@ -448,10 +448,10 @@ func (m *Module) publishMode(connName, mode, name string, values ...Map) error {
 	} else {
 		body := msgEnvelope{
 			Name:     name,
-			Metadata: bamgoo.NewMeta().Metadata(),
+			Metadata: infra.NewMeta().Metadata(),
 			Payload:  payload,
 		}
-		bytes, err := bamgoo.Marshal(inst.Config.Codec, body)
+		bytes, err := infra.Marshal(inst.Config.Codec, body)
 		if err != nil {
 			return err
 		}
@@ -481,7 +481,7 @@ func (inst *Instance) serving(name string, data []byte) {
 
 	ctx := &Context{
 		inst:    inst,
-		Meta:    bamgoo.NewMeta(),
+		Meta:    infra.NewMeta(),
 		nexts:   make([]ctxFunc, 0),
 		Setting: Map{},
 		Value:   Map{},
@@ -496,12 +496,12 @@ func (inst *Instance) serving(name string, data []byte) {
 
 	if inst.Config.External {
 		payload := Map{}
-		if err := bamgoo.Unmarshal(inst.Config.Codec, data, &payload); err == nil {
+		if err := infra.Unmarshal(inst.Config.Codec, data, &payload); err == nil {
 			ctx.Value = payload
 		}
 	} else {
 		env := msgEnvelope{}
-		if err := bamgoo.Unmarshal(inst.Config.Codec, data, &env); err == nil {
+		if err := infra.Unmarshal(inst.Config.Codec, data, &env); err == nil {
 			ctx.Metadata(env.Metadata)
 			if env.Payload != nil {
 				ctx.Value = env.Payload
@@ -512,7 +512,7 @@ func (inst *Instance) serving(name string, data []byte) {
 		}
 	}
 
-	span := ctx.Begin("event:"+ctx.Name, bamgoo.TraceAttrs("bamgoo", bamgoo.TraceKindEvent, ctx.Name, Map{
+	span := ctx.Begin("event:"+ctx.Name, infra.TraceAttrs("infrago", infra.TraceKindEvent, ctx.Name, Map{
 		"module":     "event",
 		"connection": inst.Name,
 		"operation":  "consume",
@@ -586,7 +586,7 @@ func (inst *Instance) authorizing(ctx *Context) {
 func (inst *Instance) arguing(ctx *Context) {
 	if ctx.Config != nil && ctx.Config.Args != nil {
 		argsValue := Map{}
-		res := bamgoo.Mapping(ctx.Config.Args, ctx.Value, argsValue, ctx.Config.Nullable, false, ctx.Timezone())
+		res := infra.Mapping(ctx.Config.Args, ctx.Value, argsValue, ctx.Config.Nullable, false, ctx.Timezone())
 		if res != nil && res.Fail() {
 			ctx.Failed(res)
 			return

@@ -4,11 +4,11 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/bamgoo/bamgoo"
+	"github.com/infrago/infra"
 )
 
 func init() {
-	bamgoo.Register(bamgoo.DEFAULT, &defaultDriver{})
+	infra.Register(infra.DEFAULT, &defaultDriver{})
 }
 
 var (

@@ -1,7 +1,7 @@
 package event
 
 import (
-	base "github.com/bamgoo/base"
+	base "github.com/infrago/base"
 )
 
 type (

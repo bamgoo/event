@@ -1,6 +1,6 @@
 package event
 
-import . "github.com/bamgoo/base"
+import . "github.com/infrago/base"
 
 func Publish(name string, values ...Map) error {
 	return module.publish("", name, values...)
